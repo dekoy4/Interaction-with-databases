@@ -1,34 +1,96 @@
--- Запрос 1: получение заказа 2001 с JOIN по 4 таблицам
-EXPLAIN ANALYZE
-SELECT
-    o.order_id, o.order_date, o.status, o.total_amount,
-    c.name, a.address, p.name, oi.quantity, oi.price_at_order
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id	
-JOIN addresses a ON a.address_id = o.address_id
-JOIN order_items oi ON oi.order_id = o.order_id
-JOIN products p ON p.product_id = oi.product_id
-WHERE o.order_id = 2001
-ORDER BY 1, 2;
-
--- вывод EXPLAIN ANALYZE (только плоский текст, без цветов и END):
-Sort (cost=51.36..51.36 rows=2 width=152) (actual time=0.043..0.045 rows=1 loops=1)
-Sort Key: o.order_date
-Sort Method: quicksort Memory: 25kB
--> Nested Loop (cost=1.26..51.35 rows=2 width=152) (actual time=0.027..0.028 rows=1 loops=1)
--> Nested Loop (cost=0.83..24.91 rows=1 width=111) (actual time=0.016..0.017 rows=1 loops=1)
--> Nested Loop (cost=0.55..16.60 rows=1 width=76) (actual time=0.012..0.013 rows=1 loops=1)
--> Index Scan using orders_pkey on orders o (cost=0.28..8.29 rows=1 width=30) (actual time=0.007..0.008 rows=1 loops=1)
-Index Cond: (order_id = 2001)
--> Index Scan using customers_pkey on customers c (cost=0.28..8.29 rows=1 width=54) (actual time=0.003..0.003 rows=1 loops=1)
-Index Cond: (customer_id = o.customer_id)
--> Index Scan using addresses_pkey on addresses a (cost=0.28..8.29 rows=1 width=43) (actual time=0.003..0.003 rows=1 loops=1)
-Index Cond: (address_id = o.address_id)
--> Nested Loop (cost=0.43..26.42 rows=2 width=45) (actual time=0.010..0.011 rows=1 loops=1)
--> Index Scan using idx_order_items_order_product on order_items oi (cost=0.28..10.07 rows=2 width=17) (actual time=0.005..0.006 rows=1 loops=1)
-Index Cond: (order_id = 2001)
--> Index Scan using products_pkey on products p (cost=0.15..8.17 rows=1 width=36) (actual time=0.004..0.004 rows=1 loops=1)
-Index Cond: (product_id = oi.product_id)
-Planning Time: 0.433 ms
-Execution Time: 0.092 ms
+[?1049h[22;0;0t[24;1H[?1h=                                                                         QUERY P LAN                                                                         
+-------------------------------------------------------------------------------- ----------------------------------------------------------------------------
+ Sort  (cost=49.61..49.62 rows=2 width=152) (actual time=0.057..0.058 rows=1 loo ps=1)
+   Sort Key: o.order_date
+   Sort Method: quicksort  Memory: 25kB
+   ->  Nested Loop  (cost=1.25..49.60 rows=2 width=152) (actual time=0.038..0.04 0 rows=1 loops=1)
+         ->  Nested Loop  (cost=1.10..33.25 rows=2 width=124) (actual time=0.034 ..0.035 rows=1 loops=1)
+               ->  Nested Loop  (cost=0.83..24.91 rows=1 width=111) (actual time =0.017..0.018 rows=1 loops=1)
+                     ->  Nested Loop  (cost=0.55..16.60 rows=1 width=76) (actual  time=0.013..0.013 rows=1 loops=1)
+                           ->  Index Scan using orders_pkey on orders o  (cost=0 .28..8.29 rows=1 width=30) (actual time=0.008..0.008 rows=1 loops=1)
+                                 Index Cond: (order_id = 2001)
+                           ->  Index Scan using customers_pkey on customers c  ( cost=0.28..8.29 rows=1 width=54) (actual time=0.004..0.004 rows=1 loops=1)
+                                 Index Cond: (customer_id = o.customer_id)
+                     ->  Index Scan using addresses_pkey on addresses a  (cost=0 :[K[K:[K[K:[K[K:[K[K:[K[K:[K[K:[K[K.28..8.29 rows=1 width=43) (actual time=0.004..0.004 rows=1 loops=1)
+:[K[K                           Index Cond: (address_id = o.address_id)
+               ->  Index Scan using idx_order_items_order_id on order_items oi   (cost=0.28..8.32 rows=2 width=17) (actual time=0.016..0.016 rows=1 loops=1)
+                     Index Cond: (order_id = 2001)
+         ->  Index Scan using products_pkey on products p  (cost=0.15..8.17 rows =1 width=36) (actual time=0.004..0.004 rows=1 loops=1)
+               Index Cond: (product_id = oi.product_id)
+ Planning Time: 1.229 ms
+ Execution Time: 0.124 ms
 (19 rows)
+
+[7m(END)[27m[K[K[7m(END)[27m[K[K[HM..0.035 rows=1 loops=1)
+[24;1H[K:[K[K
+[7m(END)[27m[K[K...skipping...
+               ->  Nested Loop  (cost=0.83..24.91 rows=1 width=111) (actual time =0.017..0.018 rows=1 loops=1)
+                     ->  Nested Loop  (cost=0.55..16.60 rows=1 width=76) (actual  time=0.013..0.013 rows=1 loops=1)
+                           ->  Index Scan using orders_pkey on orders o  (cost=0 .28..8.29 rows=1 width=30) (actual time=0.008..0.008 rows=1 loops=1)
+                                 Index Cond: (order_id = 2001)
+                           ->  Index Scan using customers_pkey on customers c  ( cost=0.28..8.29 rows=1 width=54) (actual time=0.004..0.004 rows=1 loops=1)
+                                 Index Cond: (customer_id = o.customer_id)
+                     ->  Index Scan using addresses_pkey on addresses a  (cost=0 .28..8.29 rows=1 width=43) (actual time=0.004..0.004 rows=1 loops=1)
+                           Index Cond: (address_id = o.address_id)
+               ->  Index Scan using idx_order_items_order_id on order_items oi   (cost=0.28..8.32 rows=2 width=17) (actual time=0.016..0.016 rows=1 loops=1)
+                     Index Cond: (order_id = 2001)
+         ->  Index Scan using products_pkey on products p  (cost=0.15..8.17 rows =1 width=36) (actual time=0.004..0.004 rows=1 loops=1)
+               Index Cond: (product_id = oi.product_id)
+ Planning Time: 1.229 ms
+ Execution Time: 0.124 ms
+(19 rows)
+
+[7m(END)[27m[K[K[K[7m(END)[27m[K[K[K[7m(END)[27m[K[K[7m(END)[27m[K[K[K[7m(END)[27m[K[K[7m(END)[27m[K[K[K[7m(END)[27m[K[K-[1;1H[K               ->  Nested Loop  (cost=0.83..24.91 rows=1 width=111) (actual time [2;1H[K=0.017..0.018 rows=1 loops=1)
+[3;1H[K                     ->  Nested Loop  (cost=0.55..16.60 rows=1 width=76) (actual [4;1H[K time=0.013..0.013 rows=1 loops=1)
+[5;1H[K                           ->  Index Scan using orders_pkey on orders o  (cost=0 [6;1H[K.28..8.29 rows=1 width=30) (actual time=0.008..0.008 rows=1 loops=1)
+[7;1H[K                                 Index Cond: (order_id = 2001)
+[8;1H[K                           ->  Index Scan using customers_pkey on customers c  ( [9;1H[Kcost=0.28..8.29 rows=1 width=54) (actual time=0.004..0.004 rows=1 loops=1)
+[10;1H[K                                 Index Cond: (customer_id = o.customer_id)
+[11;1H[K                     ->  Index Scan using addresses_pkey on addresses a  (cost=0 [12;1H[K.28..8.29 rows=1 width=43) (actual time=0.004..0.004 rows=1 loops=1)
+[13;1H[K                           Index Cond: (address_id = o.address_id)
+[14;1H[K               ->  Index Scan using idx_order_items_order_id on order_items oi   [15;1H[K(cost=0.28..8.32 rows=2 width=17) (actual time=0.016..0.016 rows=1 loops=1)
+[16;1H[K                     Index Cond: (order_id = 2001)
+[17;1H[K         ->  Index Scan using products_pkey on products p  (cost=0.15..8.17 rows [18;1H[K=1 width=36) (actual time=0.004..0.004 rows=1 loops=1)
+[19;1H[K               Index Cond: (product_id = oi.product_id)
+[20;1H[K Planning Time: 1.229 ms
+[21;1H[K Execution Time: 0.124 ms
+[22;1H[K(19 rows)
+[23;1H[K
+[24;1H[1;1H[K               ->  Nested Loop  (cost=0.83..24.91 rows=1 width=111) (actual time [2;1H[K=0.017..0.018 rows=1 loops=1)
+[3;1H[K                     ->  Nested Loop  (cost=0.55..16.60 rows=1 width=76) (actual [4;1H[K time=0.013..0.013 rows=1 loops=1)
+[5;1H[K                           ->  Index Scan using orders_pkey on orders o  (cost=0 [6;1H[K.28..8.29 rows=1 width=30) (actual time=0.008..0.008 rows=1 loops=1)
+[7;1H[K                                 Index Cond: (order_id = 2001)
+[8;1H[K                           ->  Index Scan using customers_pkey on customers c  ( [9;1H[Kcost=0.28..8.29 rows=1 width=54) (actual time=0.004..0.004 rows=1 loops=1)
+[10;1H[K                                 Index Cond: (customer_id = o.customer_id)
+[11;1H[K                     ->  Index Scan using addresses_pkey on addresses a  (cost=0 [12;1H[K.28..8.29 rows=1 width=43) (actual time=0.004..0.004 rows=1 loops=1)
+[13;1H[K                           Index Cond: (address_id = o.address_id)
+[14;1H[K               ->  Index Scan using idx_order_items_order_id on order_items oi   [15;1H[K(cost=0.28..8.32 rows=2 width=17) (actual time=0.016..0.016 rows=1 loops=1)
+[16;1H[K                     Index Cond: (order_id = 2001)
+[17;1H[K         ->  Index Scan using products_pkey on products p  (cost=0.15..8.17 rows [18;1H[K=1 width=36) (actual time=0.004..0.004 rows=1 loops=1)
+[19;1H[K               Index Cond: (product_id = oi.product_id)
+[20;1H[K Planning Time: 1.229 ms
+[21;1H[K Execution Time: 0.124 ms
+[22;1H[K(19 rows)
+[23;1H[K
+[24;1H[K[7mIgnore case in searches  (press RETURN)[27m[24;1H[K[K[7mNo next tag  (press RETURN)[27m[24;1H[K[K[7m(END)[27m[K[K[HM..0.035 rows=1 loops=1)
+[HM         ->  Nested Loop  (cost=1.10..33.25 rows=2 width=124) (actual time=0.034[HM0 rows=1 loops=1)
+[HM   ->  Nested Loop  (cost=1.25..49.60 rows=2 width=152) (actual time=0.038..0.04[HM   Sort Method: quicksort  Memory: 25kB
+[HM   Sort Key: o.order_date
+[HMps=1)
+[HM Sort  (cost=49.61..49.62 rows=2 width=152) (actual time=0.057..0.058 rows=1 loo[HM----------------------------------------------------------------------------
+[HM--------------------------------------------------------------------------------[HMLAN                                                                         
+[HM                                                                         QUERY P[24;1H[K:[K[K:[K[K-[Klog file: [Ktt[Kgg[Krr[Kee[Kss[K--[Kii[Kdd[Kzz[K11[K  [Kpp[Kss[Kqq[Kll[K  [K--[KUU[K  [Kpp[Koo[Kss[Ktt[Kgg[Krr[Kee[Kss[K  [K--[Kdd[K  [Kii[Kdd[Kzz[K11[K  [K--[K--[Kpp[Kss[Kee[Ktt[K==[Kpp[Kaa[Kgg[Kee[Krr[K==[Koo[Kff[Kff[K  [K--[Kcc[K  [K""[KEE[KXX[KPP[KLL[KAA[KII[KNN[K  [KAA[KNN[KAA[KLL[K[K --pset=pager=off -c "EXPLAIN ANALYY[KZZ[KEE[K  [KSS[KEE[KLL[KEE[KCC[KTT[K  [Koo[K..[Koo[Krr[Kdd[Kee[Krr[K__[Kii[Kdd[K,,[K  [Koo[K..[Koo[Krr[Kdd[Kee[Krr[K__[Kdd[Kaa[Ktt[Kee[K[KZE SELECT o.order_id, o.order_date,,[K  [Koo[K..[Kss[Ktt[Kaa[Ktt[Kuu[Kss[K,,[K  [Koo[K..[Ktt[Koo[Ktt[Kaa[Kll[K__[Kaa[Kmm[Koo[Kuu[Knn[Ktt[K,,[K  [Kcc[K..[Knn[Kaa[Kmm[Kee[K  [K[K o.status, o.total_amount, c.name AA[KSS[K  [Kcc[Kuu[Kss[Ktt[Koo[Kmm[Kee[Krr[K__[Knn[Kaa[Kmm[Kee[K,,[K  [Kaa[K..[Kaa[Kdd[Kdd[Krr[Kee[Kss[Kss[K  [KAA[KSS[K  [Kdd[Kee[Kll[Kii[K[KS customer_name, a.address AS delivv[Kee[Krr[Kyy[K__[Kaa[Kdd[Kdd[Krr[Kee[Kss[Kss[K,,[K  [Kpp[K..[Knn[Kaa[Kmm[Kee[K  [KAA[KSS[K  [Kpp[Krr[Koo[Kdd[Kuu[Kcc[Ktt[K__[Knn[Kaa[Kmm[K[Kery_address, p.name AS product_namee[K,,[K  [Koo[Kii[K..[Kqq[Kuu[Kaa[Knn[Ktt[Kii[Ktt[Kyy[K,,[K  [Koo[Kii[K..[Kpp[Krr[Kii[Kcc[Kee[K__[Kaa[Ktt[K__[Koo[Krr[Kdd[Kee[Krr[K  [KFF[K[K, oi.quantity, oi.price_at_order FRR[KOO[KMM[K  [Koo[Krr[Kdd[Kee[Krr[Kss[K  [Koo[K  [KJJ[KOO[KII[KNN[K  [Kcc[Kuu[Kss[Ktt[Koo[Kmm[Kee[Krr[Kss[K  [Kcc[K  [KOO[KNN[K  [Kcc[K..[K[KOM orders o JOIN customers c ON c.cc[Kuu[Kss[Ktt[Koo[Kmm[Kee[Krr[K__[Kii[Kdd[K  [K==[K  [Koo[K..[Kcc[Kuu[Kss[Ktt[Koo[Kmm[Kee[Krr[K__[Kii[Kdd[K  [KJJ[KOO[KII[KNN[K  [Kaa[Kdd[K[Kustomer_id = o.customer_id JOIN addd[Krr[Kee[Kss[Kss[Kee[Kss[K  [Kaa[K  [KOO[KNN[K  [Kaa[K..[Kaa[Kdd[Kdd[Krr[Kee[Kss[Kss[K__[Kii[Kdd[K  [K==[K  [Koo[K..[Kaa[Kdd[Kdd[Krr[Kee[K[Kresses a ON a.address_id = o.address[Kss[K__[Kii[Kdd[K  [KJJ[KOO[KII[KNN[K  [Koo[Krr[Kdd[Kee[Krr[K__[Kii[Ktt[Kee[Kmm[Kss[K  [Koo[Kii[K  [KOO[KNN[K  [Koo[Kii[K..[Koo[Krr[Kdd[K[Ks_id JOIN order_items oi ON oi.ordee[Krr[K__[Kii[Kdd[K  [K==[K  [Koo[K..[Koo[Krr[Kdd[Kee[Krr[K__[Kii[Kdd[K  [KJJ[KOO[KII[KNN[K  [Kpp[Krr[Koo[Kdd[Kuu[Kcc[Ktt[Kss[K  [Kpp[K  [K[Kr_id = o.order_id JOIN products p OO[KNN[K  [Kpp[K..[Kpp[Krr[Koo[Kdd[Kuu[Kcc[Ktt[K__[Kii[Kdd[K  [K==[K  [Koo[Kii[K..[Kpp[Krr[Koo[Kdd[Kuu[Kcc[Ktt[K__[Kii[Kdd[K  [KWW[KHH[KEE[K[KN p.product_id = oi.product_id WHERR[KEE[K  [Koo[K..[Koo[Krr[Kdd[Kee[Krr[K__[Kii[Kdd[K  [K==[K  [K22[K00[K00[K11[K  [KOO[KRR[KDD[KEE[KRR[K  [KBB[KYY[K  [K11[K,,[K  [K22[K;;[K[KE o.order_id = 2001 ORDER BY 1, 2;""[K  [K>>[K  [Kcc[Khh[Kee[Kcc[Kkk[Kss[K//[Kee[Kxx[Kpp[Kll[Kaa[Kii[Knn[K__[Koo[Kll[Ktt[Kpp[K__[Kaa[Kff[Ktt[Kee[Krr[K__[Kii[Knn[Kdd[Kee[Kxx[K[K > checks/explain_oltp_after_indexee[Kss[K..[Ktt[Kxx[Ktt[K..[Kъъ[KESCESC[Ksh: 1: cannot create checks/explain_oltp_after_indexes.txt.ъ: Directory nonexistent
+[K[7mCannot write to "tgres-idz1 psql -U postgres -d idz1 --pset=pager=off -c "EXPLAIN ANALYZE SELECT o.order_id, o.order_date, o.status, o.total_amount, c.name AS customer_name, a.address AS delivery_address, p.name AS product_name, oi.quantity, oi.price_at_order FROM orders o JOIN customers c ON c.customer_id = o.customer_id JOIN addresses a ON a.address_id = o.address_id JOIN order_items oi ON oi.order_id = o.order_id JOIN products p ON p.product_id = oi.product_id WHERE o.order_id = 2001 ORDER BY 1, 2;" > checks/explain_oltp_after_indexes.txt.ъESC"  (press RETURN)[27m[24;1H[K[H[2J[H[H[2J[H                                                                         QUERY P LAN                                                                         
+-------------------------------------------------------------------------------- ----------------------------------------------------------------------------
+ Sort  (cost=49.61..49.62 rows=2 width=152) (actual time=0.057..0.058 rows=1 loo ps=1)
+   Sort Key: o.order_date
+   Sort Method: quicksort  Memory: 25kB
+   ->  Nested Loop  (cost=1.25..49.60 rows=2 width=152) (actual time=0.038..0.04 0 rows=1 loops=1)
+         ->  Nested Loop  (cost=1.10..33.25 rows=2 width=124) (actual time=0.034 ..0.035 rows=1 loops=1)
+               ->  Nested Loop  (cost=0.83..24.91 rows=1 width=111) (actual time =0.017..0.018 rows=1 loops=1)
+                     ->  Nested Loop  (cost=0.55..16.60 rows=1 width=76) (actual  time=0.013..0.013 rows=1 loops=1)
+                           ->  Index Scan using orders_pkey on orders o  (cost=0 .28..8.29 rows=1 width=30) (actual time=0.008..0.008 rows=1 loops=1)
+                                 Index Cond: (order_id = 2001)
+                           ->  Index Scan using customers_pkey on customers c  ( cost=0.28..8.29 rows=1 width=54) (actual time=0.004..0.004 rows=1 loops=1)
+                                 Index Cond: (customer_id = o.customer_id)
+                     ->  Index Scan using addresses_pkey on addresses a  (cost=0 :[K
