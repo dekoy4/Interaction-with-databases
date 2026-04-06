@@ -1,0 +1,34 @@
+-- Запрос 1: получение заказа 2001 с JOIN по 4 таблицам
+EXPLAIN ANALYZE
+SELECT
+    o.order_id, o.order_date, o.status, o.total_amount,
+    c.name, a.address, p.name, oi.quantity, oi.price_at_order
+FROM orders o
+JOIN customers c ON c.customer_id = o.customer_id	
+JOIN addresses a ON a.address_id = o.address_id
+JOIN order_items oi ON oi.order_id = o.order_id
+JOIN products p ON p.product_id = oi.product_id
+WHERE o.order_id = 2001
+ORDER BY 1, 2;
+
+-- вывод EXPLAIN ANALYZE (только плоский текст, без цветов и END):
+Sort (cost=51.36..51.36 rows=2 width=152) (actual time=0.043..0.045 rows=1 loops=1)
+Sort Key: o.order_date
+Sort Method: quicksort Memory: 25kB
+-> Nested Loop (cost=1.26..51.35 rows=2 width=152) (actual time=0.027..0.028 rows=1 loops=1)
+-> Nested Loop (cost=0.83..24.91 rows=1 width=111) (actual time=0.016..0.017 rows=1 loops=1)
+-> Nested Loop (cost=0.55..16.60 rows=1 width=76) (actual time=0.012..0.013 rows=1 loops=1)
+-> Index Scan using orders_pkey on orders o (cost=0.28..8.29 rows=1 width=30) (actual time=0.007..0.008 rows=1 loops=1)
+Index Cond: (order_id = 2001)
+-> Index Scan using customers_pkey on customers c (cost=0.28..8.29 rows=1 width=54) (actual time=0.003..0.003 rows=1 loops=1)
+Index Cond: (customer_id = o.customer_id)
+-> Index Scan using addresses_pkey on addresses a (cost=0.28..8.29 rows=1 width=43) (actual time=0.003..0.003 rows=1 loops=1)
+Index Cond: (address_id = o.address_id)
+-> Nested Loop (cost=0.43..26.42 rows=2 width=45) (actual time=0.010..0.011 rows=1 loops=1)
+-> Index Scan using idx_order_items_order_product on order_items oi (cost=0.28..10.07 rows=2 width=17) (actual time=0.005..0.006 rows=1 loops=1)
+Index Cond: (order_id = 2001)
+-> Index Scan using products_pkey on products p (cost=0.15..8.17 rows=1 width=36) (actual time=0.004..0.004 rows=1 loops=1)
+Index Cond: (product_id = oi.product_id)
+Planning Time: 0.433 ms
+Execution Time: 0.092 ms
+(19 rows)
