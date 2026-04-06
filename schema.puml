@@ -47,4 +47,4 @@ customers ||..|| addresses
 orders ||..|| order_items
 products ||..|| order_items
 categories ||..|| products
-@enduml 
+@enduml
