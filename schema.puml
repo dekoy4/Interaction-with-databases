@@ -1,1 +1,50 @@
- 
+@startuml
+title ER-diagram 3NF (интернет-магазин)
+
+entity customers {
+    customer_id PK
+    name
+    email
+    phone
+}
+
+entity addresses {
+    address_id PK
+    customer_id FK
+    address
+}
+
+entity categories {
+    category_id PK
+    name
+}
+
+entity products {
+    product_id PK
+    name
+    category_id FK
+    price
+}
+
+entity orders {
+    order_id PK
+    customer_id FK
+    address_id FK
+    order_date
+    status
+    total_amount
+}
+
+entity order_items {
+    order_id FK
+    product_id FK
+    quantity
+    price_at_order
+}
+
+customers ||..|| orders
+customers ||..|| addresses
+orders ||..|| order_items
+products ||..|| order_items
+categories ||..|| products
+@enduml 
