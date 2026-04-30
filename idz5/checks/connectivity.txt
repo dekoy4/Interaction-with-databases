@@ -1,0 +1,21 @@
+============================================================
+MANTICORE CONNECTIVITY CHECK
+============================================================
+
+Date: 2026-04-30 11:57:27
+
+=== Connection Method ===
+MySQL Protocol: mysql -h 127.0.0.1 -P 9306
+
+=== Connection Test ===
+Status: CONNECTED
+Test query result: 1
+
+=== Docker Container ===
+Container: manticore_search
+Status: Up About an hour
+Ports: 0.0.0.0:9306->9306/tcp, [::]:9306->9306/tcp, 0.0.0.0:9308->9308/tcp, [::]:9308->9308/tcp
+
+=== HTTP API ===
+Endpoint: http://localhost:9308/sql
+Method: POST with query parameter
