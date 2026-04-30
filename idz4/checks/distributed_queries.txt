@@ -1,0 +1,120 @@
+SELECT count()
+FROM events_distributed
+
+Query id: ee896bd0-af72-49f5-9d8b-e40f463611ea
+
+   ┌─count()─┐
+1. │ 2000000 │ -- 2.00 million
+   └─────────┘
+
+1 row in set. Elapsed: 0.011 sec.
+
+====
+
+SELECT sum(rows) AS value
+FROM
+(
+    SELECT
+        hostName() AS host,
+        count() AS rows
+    FROM cluster('cluster_2x2', default, events_local)
+    GROUP BY host
+)
+
+Query id: bf6ae147-bf48-41dd-ba84-3242a5573de2
+
+   ┌───value─┐
+1. │ 2000000 │ -- 2.00 million
+   └─────────┘
+
+1 row in set. Elapsed: 0.014 sec.
+
+====
+
+EXPLAIN
+SELECT
+    user_id,
+    count() AS event_count
+FROM events_distributed
+GROUP BY user_id
+ORDER BY event_count DESC
+LIMIT 10
+
+Query id: 46a7c29c-2f12-4b6b-a3c9-c78045798349
+
+    ┌─explain──────────────────────────────────────────────────────────────────────────────────┐
+ 1. │ Expression (Project names)                                                               │
+ 2. │   Limit (preliminary LIMIT (without OFFSET))                                             │
+ 3. │     Sorting (Sorting for ORDER BY)                                                       │
+ 4. │       Expression ((Before ORDER BY + Projection))                                        │
+ 5. │         MergingAggregated                                                                │
+ 6. │           Union                                                                          │
+ 7. │             Aggregating                                                                  │
+ 8. │               Expression ((Before GROUP BY + Change column names to column identifiers)) │
+ 9. │                 ReadFromMergeTree (default.events_local)                                 │
+10. │             ReadFromRemote (Read from remote replica)                                    │
+    └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+10 rows in set. Elapsed: 0.006 sec.
+
+====
+
+SELECT
+    page_url,
+    count() AS visits
+FROM events_distributed
+GROUP BY page_url
+ORDER BY visits DESC
+LIMIT 10
+
+Query id: 3edb666b-2ec3-4ece-9594-107c218e8315
+
+    ┌─page_url─────┬─visits─┐
+ 1. │ /search      │ 200617 │
+ 2. │ /product/456 │ 200542 │
+ 3. │ /checkout    │ 200327 │
+ 4. │ /contacts    │ 200043 │
+ 5. │ /cart        │ 199954 │
+ 6. │ /product/123 │ 199890 │
+ 7. │ /catalog     │ 199863 │
+ 8. │ /index       │ 199632 │
+ 9. │ /about       │ 199602 │
+10. │ /profile     │ 199530 │
+    └──────────────┴────────┘
+↓ Progress: 2.00 million rows, 34.40 MB (32.69 million rows/s., 562.28 MB/s.)  9↙ Progress: 2.00 million rows, 34.40 MB (32.69 million rows/s., 562.28 MB/s.)  9
+10 rows in set. Elapsed: 0.062 sec. Processed 2.00 million rows, 34.40 MB (32.51 million rows/s., 559.18 MB/s.)
+Peak memory usage: 456.83 KiB.
+
+==== (BROADCAST JOIN)
+
+SELECT
+    e.user_id,
+    u.name,
+    u.segment,
+    count() AS events
+FROM events_distributed AS e
+INNER JOIN user_dict AS u ON e.user_id = u.user_id
+GROUP BY
+    e.user_id,
+    u.name,
+    u.segment
+ORDER BY events DESC
+LIMIT 10
+
+Query id: cfdd0ea1-2417-4090-8a6d-1d3b5653ebd8
+
+    ┌─user_id─┬─name──────┬─segment────┬─events─┐
+ 1. │    4963 │ User_4963 │ enterprise │    256 │
+ 2. │     894 │ User_894  │ premium    │    254 │
+ 3. │    7890 │ User_7890 │ premium    │    247 │
+ 4. │    8380 │ User_8380 │ free       │    247 │
+ 5. │    6668 │ User_6668 │ free       │    246 │
+ 6. │    9481 │ User_9481 │ basic      │    245 │
+ 7. │    3816 │ User_3816 │ free       │    245 │
+ 8. │    1315 │ User_1315 │ enterprise │    244 │
+ 9. │    1896 │ User_1896 │ free       │    243 │
+10. │    3404 │ User_3404 │ free       │    242 │
+    └─────────┴───────────┴────────────┴────────┘
+
+10 rows in set. Elapsed: 0.080 sec. Processed 1.12 million rows, 9.16 MB (13.99 million rows/s., 114.25 MB/s.)
+Peak memory usage: 20.56 MiB.
