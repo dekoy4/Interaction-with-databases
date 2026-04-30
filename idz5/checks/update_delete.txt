@@ -1,0 +1,18 @@
+============================================================
+6. UPDATE и DELETE в Manticore
+============================================================
+
+=== ИСХОДНАЯ ЗАПИСЬ ===
+ID: 58501, Price: 99999.992188, Rating: 4.9
+
+=== ПОСЛЕ UPDATE ===
+UPDATE products SET price = 99999.99, rating = 4.9 WHERE id = 58501
+New Price: 99999.992188, New Rating: 4.9
+
+=== ПОСЛЕ DELETE ===
+DELETE FROM products WHERE id = 58501
+Записей с ID=58501: 1
+
+=== ПРИМЕЧАНИЕ О REPLACE ===
+В Manticore нет прямой команды REPLACE.
+Для замены документа нужно выполнить DELETE, а затем INSERT.
