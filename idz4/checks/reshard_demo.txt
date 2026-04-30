@@ -1,0 +1,115 @@
+CREATE TABLE events_local ON CLUSTER cluster_2x2
+(
+    `event_date` Date,
+    `event_time` DateTime,
+    `user_id` UInt64,
+    `session_id` String,
+    `event_type` LowCardinality(String),
+    `page_url` String,
+    `duration_ms` UInt32
+)
+ENGINE = ReplicatedMergeTree('/clickhouse/tables/{shard}/events_local', '{replica}')
+PARTITION BY toYYYYMM(event_date)
+ORDER BY (user_id, event_time)
+
+Query id: d196a3d8-ec6f-483a-a0aa-80b22c590ca4
+
+   ┌─host─────────┬─port─┬─status─┬─error───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─num_hosts_remaining─┬─num_hosts_active─┐
+1. │ idz4_ch_s1r1 │ 9000 │     57 │ Code: 57. DB::Exception: Table default.events_local already exists. (TABLE_ALREADY_EXISTS) (version 24.3.18.7 (official build)) │                   5 │                2 │
+2. │ idz4_ch_s2r1 │ 9000 │     57 │ Code: 57. DB::Exception: Table default.events_local already exists. (TABLE_ALREADY_EXISTS) (version 24.3.18.7 (official build)) │                   4 │                2 │
+3. │ idz4_ch_s1r2 │ 9000 │     57 │ Code: 57. DB::Exception: Table default.events_local already exists. (TABLE_ALREADY_EXISTS) (version 24.3.18.7 (official build)) │                   3 │                2 │
+4. │ idz4_ch_s2r2 │ 9000 │     57 │ Code: 57. DB::Exception: Table default.events_local already exists. (TABLE_ALREADY_EXISTS) (version 24.3.18.7 (official build)) │                   2 │                2 │
+   └──────────────┴──────┴────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────┴──────────────────┘
+   ┌─host─────────┬─port─┬─status─┬─error─┬─num_hosts_remaining─┬─num_hosts_active─┐
+5. │ idz4_ch_s3r2 │ 9000 │      0 │       │                   1 │                0 │
+6. │ idz4_ch_s3r1 │ 9000 │      0 │       │                   0 │                0 │
+   └──────────────┴──────┴────────┴───────┴─────────────────────┴──────────────────┘
+← Progress: 6.00 rows, 844.00 B (50.30 rows/s., 7.08 KB/s.)  99%
+6 rows in set. Elapsed: 0.119 sec.
+
+Received exception from server (version 24.3.18):
+Code: 57. DB::Exception: Received from localhost:9000. DB::Exception: There was an error on [idz4_ch_s1r1:9000]: Code: 57. DB::Exception: Table default.events_local already exists. (TABLE_ALREADY_EXISTS) (version 24.3.18.7 (official build)). (TABLE_ALREADY_EXISTS)
+
+=====
+
+idz4_ch_s3r2 :) DROP TABLE IF EXISTS events_distributed ON CLUSTER 'cluster_2x2';
+
+DROP TABLE IF EXISTS events_distributed ON CLUSTER cluster_2x2
+
+Query id: aed8d890-da85-4fb9-a56a-151e8dd476ae
+
+   ┌─host─────────┬─port─┬─status─┬─error─┬─num_hosts_remaining─┬─num_hosts_active─┐
+1. │ idz4_ch_s3r2 │ 9000 │      0 │       │                   5 │                0 │
+2. │ idz4_ch_s1r2 │ 9000 │      0 │       │                   4 │                0 │
+3. │ idz4_ch_s2r2 │ 9000 │      0 │       │                   3 │                0 │
+4. │ idz4_ch_s3r1 │ 9000 │      0 │       │                   2 │                0 │
+5. │ idz4_ch_s2r1 │ 9000 │      0 │       │                   1 │                0 │
+6. │ idz4_ch_s1r1 │ 9000 │      0 │       │                   0 │                0 │
+   └──────────────┴──────┴────────┴───────┴─────────────────────┴──────────────────┘
+
+6 rows in set. Elapsed: 0.078 sec.
+
+=====
+
+CREATE TABLE events_distributed ON CLUSTER cluster_2x2 AS events_local
+ENGINE = Distributed('cluster_2x2', default, events_local, xxHash64(user_id))
+
+Query id: 0bf2f4f2-eb96-4ccf-b952-4d79e4f050ba
+
+   ┌─host─────────┬─port─┬─status─┬─error─┬─num_hosts_remaining─┬─num_hosts_active─┐
+1. │ idz4_ch_s2r2 │ 9000 │      0 │       │                   5 │                0 │
+2. │ idz4_ch_s3r1 │ 9000 │      0 │       │                   4 │                0 │
+3. │ idz4_ch_s2r1 │ 9000 │      0 │       │                   3 │                0 │
+4. │ idz4_ch_s1r2 │ 9000 │      0 │       │                   2 │                0 │
+5. │ idz4_ch_s1r1 │ 9000 │      0 │       │                   1 │                0 │
+6. │ idz4_ch_s3r2 │ 9000 │      0 │       │                   0 │                0 │
+   └──────────────┴──────┴────────┴───────┴─────────────────────┴──────────────────┘
+
+6 rows in set. Elapsed: 0.076 sec.
+
+=====
+
+SELECT *
+FROM system.clusters
+WHERE cluster = 'cluster_2x2'
+
+Query id: 52464caf-1964-4cdc-945d-4bc0b201dd1c
+
+   ┌─cluster─────┬─shard_num─┬─shard_weight─┬─internal_replication─┬─replica_num─┬─host_name────┬─host_address─┬─port─┬─is_local─┬─user────┬─default_database─┬─errors_count─┬─slowdowns_count─┬─estimated_recovery_time─┬─database_shard_name─┬─database_replica_name─┬─is_active─┐
+1. │ cluster_2x2 │         1 │            1 │                    0 │           1 │ idz4_ch_s1r1 │ 172.20.0.8   │ 9000 │        0 │ default │                  │            0 │               0 │                       0 │                     │                       │      ᴺᵁᴸᴸ │
+2. │ cluster_2x2 │         1 │            1 │                    0 │           2 │ idz4_ch_s1r2 │ 172.20.0.7   │ 9000 │        0 │ default │                  │            0 │               0 │                       0 │                     │                       │      ᴺᵁᴸᴸ │
+3. │ cluster_2x2 │         2 │            1 │                    0 │           1 │ idz4_ch_s2r1 │ 172.20.0.5   │ 9000 │        0 │ default │                  │            0 │               0 │                       0 │                     │                       │      ᴺᵁᴸᴸ │
+4. │ cluster_2x2 │         2 │            1 │                    0 │           2 │ idz4_ch_s2r2 │ 172.20.0.10  │ 9000 │        0 │ default │                  │            0 │               0 │                       0 │                     │                       │      ᴺᵁᴸᴸ │
+5. │ cluster_2x2 │         3 │            1 │                    0 │           1 │ idz4_ch_s3r1 │ 172.20.0.6   │ 9000 │        0 │ default │                  │            0 │               0 │                       0 │                     │                       │      ᴺᵁᴸᴸ │
+6. │ cluster_2x2 │         3 │            1 │                    0 │           2 │ idz4_ch_s3r2 │ 172.20.0.9   │ 9000 │        1 │ default │                  │            0 │               0 │                       0 │                     │                       │      ᴺᵁᴸᴸ │
+   └─────────────┴───────────┴──────────────┴──────────────────────┴─────────────┴──────────────┴──────────────┴──────┴──────────┴─────────┴──────────────────┴──────────────┴─────────────────┴─────────────────────────┴─────────────────────┴───────────────────────┴───────────┘
+
+6 rows in set. Elapsed: 0.008 sec.
+
+=====
+
+INSERT INTO events_distributed SELECT
+    today() AS event_date,
+    now() - toIntervalSecond(rand() % 3600) AS event_time,
+    (rand() % 10000) + 1 AS user_id,
+    generateUUIDv4() AS session_id,
+    'new_shard_test' AS event_type,
+    '/test' AS page_url,
+    rand() % 1000 AS duration_ms
+FROM numbers(300000)
+
+Query id: b7988be1-26f7-4d84-a9b7-cdfc4e422cd0
+
+Ok.
+
+0 rows in set. Elapsed: 0.187 sec. Processed 300.00 thousand rows, 2.40 MB (1.61 million rows/s., 12.85 MB/s.)
+Peak memory usage: 72.47 MiB.
+
+=====
+
+❯ for c in idz4_ch_s1r1 idz4_ch_s2r1 idz4_ch_s3r1; do
+ docker exec $c clickhouse-client -q "SELECT hostName(), count() FROM events_local;"
+done
+idz4_ch_s1r1	1098688
+idz4_ch_s2r1	1101195
+idz4_ch_s3r1	100117
