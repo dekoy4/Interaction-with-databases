@@ -1,0 +1,6 @@
+Row 1:
+──────
+replica_name:     ch2
+queue_size:       0
+inserts_in_queue: 0
+merges_in_queue:  0
