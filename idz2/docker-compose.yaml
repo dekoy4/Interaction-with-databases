@@ -1,0 +1,17 @@
+services:
+  clickhouse-server:
+    image: clickhouse/clickhouse-server
+    container_name: test-clickhouse-server
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - ./config/config.d:/etc/clickhouse-server/config.d/
+      - ./config/users.d:/etc/clickhouse-server/users.d/
+      - ./sql:/scripts/
+      - ./scripts:/generated/
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    restart: unless-stopped
