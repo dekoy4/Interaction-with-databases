@@ -93,9 +93,9 @@ volumes:
   - Проверяем работоспособность распределённого Keeper-кластера, то есть что кворум образовался, а именно что киперы договорились кто из них лидер, а кто последователь, они работают сообща
     - Отвечает ли Kepper как сервис docker exec -i keeper1 bash -c "echo ruok | nc localhost 9181". Ожидаем imok
     - Проверяем роль каждого через docker exec -i keeper1 bash -c "echo mntr | nc localhost 9181". Ожидаем, что у двух в zk_server_state будет follower, а у одного leader
-      - [keeper1_health](https://github.com/danilaercegovac/Data-Base-2026/blob/main/3rd%20LAB/checks/keeper1_health.txt)
-      - [keeper2_health](https://github.com/danilaercegovac/Data-Base-2026/blob/main/3rd%20LAB/checks/keeper2_health.txt)
-      - [keeper3_health](https://github.com/danilaercegovac/Data-Base-2026/blob/main/3rd%20LAB/checks/keeper3_health.txt)
+      - [keeper1_health](https://github.com/dekoy4/Interaction-with-databases/blob/main/idz3/checks/keeper1_health.txt)
+      - [keeper2_health](https://github.com/dekoy4/Interaction-with-databases/blob/main/idz3/checks/keeper2_health.txt)
+      - [keeper3_health](https://github.com/dekoy4/Interaction-with-databases/blob/main/idz3/checks/keeper3_health.txt)
 ### Часть 2. Реплицированные таблицы
 - Создаём папки для ClickHouse-сервисов
 ```
@@ -306,11 +306,11 @@ FROM numbers(100000);
 - Подключаемся к 2му 3му сервису docker exec -it ch2 clickhouse-client и проверяем у них также `SELECT count() FROM events;`. Ожидаем 100000
 - Проверяем system.replicas на каждой реплике
   - c1: `docker exec -i ch1 clickhouse-client --query "SELECT database, table, replica_name, is_leader, total_replicas, active_replicas, queue_size, inserts_in_queue, merges_in_queue, log_pointer, last_queue_update FROM system.replicas WHERE table = 'events' FORMAT Vertical" > checks\replicas_status_node1.txt`
-    - [replicas_status_node1.txt](https://github.com/danilaercegovac/Data-Base-2026/blob/main/3rd%20LAB/checks/replicas_status_node1.txt)
+    - [replicas_status_node1.txt](https://github.com/dekoy4/Interaction-with-databases/blob/main/idz3/checks/replicas_status_node1.txt)
   - c2: `docker exec -i ch2 clickhouse-client --query "SELECT database, table, replica_name, is_leader, total_replicas, active_replicas, queue_size, inserts_in_queue, merges_in_queue, log_pointer, last_queue_update FROM system.replicas WHERE table = 'events' FORMAT Vertical" > checks\replicas_status_node2.txt`
-    - [replicas_status_node2.txt](https://github.com/danilaercegovac/Data-Base-2026/blob/main/3rd%20LAB/checks/replicas_status_node2.txt)
+    - [replicas_status_node2.txt](https://github.com/dekoy4/Interaction-with-databases/blob/main/idz3/checks/replicas_status_node2.txt)
   - c3: `docker exec -i ch3 clickhouse-client --query "SELECT database, table, replica_name, is_leader, total_replicas, active_replicas, queue_size, inserts_in_queue, merges_in_queue, log_pointer, last_queue_update FROM system.replicas WHERE table = 'events' FORMAT Vertical" > checks\replicas_status_node3.txt`
-    - [replicas_status_node3.txt](https://github.com/danilaercegovac/Data-Base-2026/blob/main/3rd%20LAB/checks/replicas_status_node3.txt)
+    - [replicas_status_node3.txt](https://github.com/dekoy4/Interaction-with-databases/blob/main/idz3/checks/replicas_status_node3.txt)
 ### Часть 4. Отказоустойчивость
 #### A. Потеря одной реплики
 - Останавливаем один из сервисов `docker stop ch3`
@@ -319,12 +319,12 @@ FROM numbers(100000);
 - Поднимаем отключенный сервис `docker start ch3`
 - *Синхронизация прошла очень быстро* - не получилось выполнить 5 часть
 - Сохраняем состояние синхронизировавшийся реплики `docker exec -i ch3 clickhouse-client --query "SELECT database, table, replica_name, queue_size, inserts_in_queue, merges_in_queue, total_replicas, active_replicas FROM system.replicas WHERE table = 'events' FORMAT Vertical" > checks\experiment_A_ch3_recovered.txt`
-  - [experiment_A_ch3_recovered.txt](https://github.com/danilaercegovac/Data-Base-2026/blob/main/3rd%20LAB/checks/experiment_A_ch3_recovered.txt)
+  - [experiment_A_ch3_recovered.txt](https://github.com/dekoy4/Interaction-with-databases/blob/main/idz3/checks/experiment_A_ch3_recovered.txt)
 #### B. Потеря Keeper-узла
 - Остановим 3ий кипер `docker stop keeper3`
 - Проверяем, что кворумы живы
-  - [experiment_B_keeper1_mntr.txt](https://github.com/danilaercegovac/Data-Base-2026/blob/main/3rd%20LAB/checks/experiment_B_keeper1_mntr.txt)
-  - [experiment_B_keeper2_mntr.txt](https://github.com/danilaercegovac/Data-Base-2026/blob/main/3rd%20LAB/checks/experiment_B_keeper2_mntr.txt)
+  - [experiment_B_keeper1_mntr.txt](https://github.com/dekoy4/Interaction-with-databases/blob/main/idz3/checks/experiment_B_keeper1_mntr.txt)
+  - [experiment_B_keeper2_mntr.txt](https://github.com/dekoy4/Interaction-with-databases/blob/main/idz3/checks/experiment_B_keeper2_mntr.txt)
 ```
 docker exec -i keeper1 bash -c "echo mntr | nc localhost 9181" > checks\experiment_B_keeper1_mntr.txt
 docker exec -i keeper2 bash -c "echo mntr | nc localhost 9181" > checks\experiment_B_keeper2_mntr.txt
@@ -333,13 +333,13 @@ docker exec -i keeper2 bash -c "echo mntr | nc localhost 9181" > checks\experime
 - Проверим, что кворум сработал и данные реплицировались `docker exec -i ch2 clickhouse-client --query "SELECT event_type, count() FROM events WHERE event_type = 'keeper_one_down' GROUP BY event_type"`
 - Остановим второй кипер - разрушим кворум `docker stop keeper2`
 - Пробуем вставить 'docker exec -i ch1 clickhouse-client --query "INSERT INTO events SELECT now(), 'keeper_quorum_lost', number + 300000, concat('payload_B2_', toString(number)) FROM numbers(1000)" > checks\experiment_B_insert_without_quorum.txt 2>&1'
-  - Запрос завис, до ошибки не дошло, файл [experiment_B_insert_without_quorum.txt](https://github.com/danilaercegovac/Data-Base-2026/blob/main/3rd%20LAB/checks/experiment_B_insert_without_quorum.txt) оказался пустой
+  - Запрос завис, до ошибки не дошло, файл [experiment_B_insert_without_quorum.txt](https://github.com/dekoy4/Interaction-with-databases/blob/main/idz3/checks/experiment_B_insert_without_quorum.txt) оказался пустой
 - Проверяем, что чтение доступно `docker exec -i ch1 clickhouse-client --query "SELECT count() FROM events" > checks\experiment_B_select_without_quorum.txt`
-  - [experiment_B_select_without_quorum.txt](https://github.com/danilaercegovac/Data-Base-2026/blob/main/3rd%20LAB/checks/experiment_B_select_without_quorum.txt)
+  - [experiment_B_select_without_quorum.txt](https://github.com/dekoy4/Interaction-with-databases/blob/main/idz3/checks/experiment_B_select_without_quorum.txt)
 ### C. Конфликт данных
 - Остановить реплику `docker stop ch2`
 - Внести данные `docker exec -i ch1 clickhouse-client --query "INSERT INTO events SELECT now(), 'conflict_test', number + 400000, concat('payload_C_', toString(number)) FROM numbers(5000)"`
 - Включить реплику `docker start ch2`
 - Проверяем, что реплика догнала `docker exec -i ch2 clickhouse-client --query "SELECT event_type, count() FROM events WHERE event_type = 'conflict_test' GROUP BY event_type"`
 - Проверяем очередь `docker exec -i ch2 clickhouse-client --query "SELECT replica_name, queue_size, inserts_in_queue, merges_in_queue FROM system.replicas WHERE table = 'events' FORMAT Vertical" > checks\experiment_C_ch2_queue.txt`
-  - [experiment_C_ch2_queue.txt](https://github.com/danilaercegovac/Data-Base-2026/blob/main/3rd%20LAB/checks/experiment_C_ch2_queue.txt)
+  - [experiment_C_ch2_queue.txt](https://github.com/dekoy4/Interaction-with-databases/blob/main/idz3/checks/experiment_C_ch2_queue.txt)
