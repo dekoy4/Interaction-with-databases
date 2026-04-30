@@ -1,0 +1,17 @@
+zk_version	v26.3.9.8-lts-0d82c1998e3b4d54e110dd8a77a64d247c4bff4a
+zk_avg_latency	45
+zk_max_latency	567
+zk_min_latency	0
+zk_packets_received	36
+zk_packets_sent	36
+zk_num_alive_connections	0
+zk_outstanding_requests	0
+zk_server_state	follower
+zk_znode_count	110
+zk_watch_count	0
+zk_ephemerals_count	7
+zk_approximate_data_size	23362
+zk_key_arena_size	0
+zk_latest_snapshot_size	114
+zk_open_file_descriptor_count	73
+zk_max_file_descriptor_count	1048576
