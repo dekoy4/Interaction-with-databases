@@ -1,1 +1,37 @@
+@startuml
+title Cluster
 
+rectangle "Quorum" {
+    node "keeper1" as k1
+    node "keeper2" as k2
+    node "keeper3" as k3
+    k1 -- k2 : Raft
+    k2 -- k3 : Raft
+    k1 -- k3 : Raft
+}
+
+rectangle "Shard 01" {
+    node "replica s1r1" as s1r1
+    node "replica s1r2" as s1r2
+    s1r1 <..> s1r2 : replication
+}
+
+rectangle "Shard 02" {
+    node "replica s2r1" as s2r1
+    node "nreplica s2r2" as s2r2
+    s2r1 <..> s2r2 : replication
+}
+
+rectangle "Shard 03 (added)" {
+    node "replica s3r1" as s3r1
+    node "replica s3r2" as s3r2
+    s3r1 <..> s3r2 : replication
+}
+
+s1r1 --> k1 : coordination
+s1r2 --> k1 : coordination
+s2r1 --> k2 : coordination
+s2r2 --> k2 : coordination
+s3r1 --> k3 : coordination
+s3r2 --> k3 : coordination
+@enduml
