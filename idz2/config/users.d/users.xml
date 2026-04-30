@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <profiles>
+        <readonly_profile>
+            <readonly>1</readonly>
+            
+            <max_execution_time>60</max_execution_time> 
+            <max_result_rows>1000000</max_result_rows> 
+            <max_result_bytes>10485760</max_result_bytes>
+            <max_memory_usage>1073741824</max_memory_usage> 
+        </readonly_profile>
+    </profiles>
+    
+    <users>
+        <default>
+            <networks>
+                <ip>::/0</ip>
+                <ip>0.0.0.0/0</ip>
+            </networks>
+        </default>
+
+        <analyst>
+            <password>123</password>            
+            <profile>readonly_profile</profile>
+            <networks>
+                <ip>::/0</ip>
+                <ip>0.0.0.0/0</ip>
+            </networks>
+        </analyst>
+    </users>
+</clickhouse>
