@@ -1,0 +1,23 @@
+# КОЛ-ВО ЗАПИСЕЙ ПО ШАРДАМ И РЕПЛИКАМ
+❯ for c in idz4_ch_s1r1 idz4_ch_s2r1 idz4_ch_s1r2 idz4_ch_s2r2; do
+    docker exec $c clickhouse-client -q \
+        "SELECT hostName() AS host, count() AS rows FROM events_local;"
+done
+idz4_ch_s1r1	1000647
+idz4_ch_s2r1	999353
+idz4_ch_s1r2	1000647
+idz4_ch_s2r2	999353
+
+# УНИКАЛЬНЫЕ ПОЛЬЗОВАТЕЛИ ПО ШАРДАМ И РЕПЛИКАМ
+❯ for c in idz4_ch_s1r1 idz4_ch_s2r1 idz4_ch_s1r2 idz4_ch_s2r2; do
+    docker exec $c clickhouse-client -q \
+        "SELECT hostName(), uniq(user_id), count() FROM events_local;"
+done
+idz4_ch_s1r1	5004	1000647
+idz4_ch_s2r1	4996	999353
+idz4_ch_s1r2	5004	1000647
+idz4_ch_s2r2	4996	999353
+
+# ВСЕ ЗАПИСИ
+❯ ch-s1r1 -q "SELECT count() FROM events_distributed;"
+2000000
