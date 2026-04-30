@@ -1,0 +1,114 @@
+services:
+  keeper1:
+    image: clickhouse/clickhouse-keeper:24.3
+    container_name: idz4_keeper1
+    hostname: idz4_keeper1
+    volumes:
+      - ./config/keeper/keeper1.xml:/etc/clickhouse-keeper/keeper_config.xml
+      - keeper1_data:/var/lib/clickhouse
+    restart: unless-stopped
+
+  keeper2:
+    image: clickhouse/clickhouse-keeper:24.3
+    container_name: idz4_keeper2
+    hostname: idz4_keeper2
+    volumes:
+      - ./config/keeper/keeper2.xml:/etc/clickhouse-keeper/keeper_config.xml
+      - keeper2_data:/var/lib/clickhouse
+    restart: unless-stopped
+
+  keeper3:
+    image: clickhouse/clickhouse-keeper:24.3
+    container_name: idz4_keeper3
+    hostname: idz4_keeper3
+    volumes:
+      - ./config/keeper/keeper3.xml:/etc/clickhouse-keeper/keeper_config.xml
+      - keeper3_data:/var/lib/clickhouse
+    restart: unless-stopped
+
+  ch_s1r1:
+    image: clickhouse/clickhouse-server:24.3
+    container_name: idz4_ch_s1r1
+    hostname: idz4_ch_s1r1
+    ports:
+      - "9001:9000"
+      - "8124:8123"
+    volumes:
+      - ./config/clickhouse/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml
+      - ./config/clickhouse/s1r1_macros.xml:/etc/clickhouse-server/config.d/macros.xml
+      - ./config/clickhouse/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ch_s1r1_data:/var/lib/clickhouse
+    depends_on: [keeper1, keeper2, keeper3]
+    restart: unless-stopped
+
+  ch_s1r2:
+    image: clickhouse/clickhouse-server:24.3
+    container_name: idz4_ch_s1r2
+    hostname: idz4_ch_s1r2
+    volumes:
+      - ./config/clickhouse/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml
+      - ./config/clickhouse/s1r2_macros.xml:/etc/clickhouse-server/config.d/macros.xml
+      - ./config/clickhouse/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ch_s1r2_data:/var/lib/clickhouse
+    depends_on: [keeper1, keeper2, keeper3]
+    restart: unless-stopped
+
+  ch_s2r1:
+    image: clickhouse/clickhouse-server:24.3
+    container_name: idz4_ch_s2r1
+    hostname: idz4_ch_s2r1
+    volumes:
+      - ./config/clickhouse/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml
+      - ./config/clickhouse/s2r1_macros.xml:/etc/clickhouse-server/config.d/macros.xml
+      - ./config/clickhouse/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ch_s2r1_data:/var/lib/clickhouse
+    depends_on: [keeper1, keeper2, keeper3]
+    restart: unless-stopped
+
+  ch_s2r2:
+    image: clickhouse/clickhouse-server:24.3
+    container_name: idz4_ch_s2r2
+    hostname: idz4_ch_s2r2
+    volumes:
+      - ./config/clickhouse/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml
+      - ./config/clickhouse/s2r2_macros.xml:/etc/clickhouse-server/config.d/macros.xml
+      - ./config/clickhouse/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ch_s2r2_data:/var/lib/clickhouse
+    depends_on: [keeper1, keeper2, keeper3]
+    restart: unless-stopped
+
+  # ДОБАВЛЯЮ ПРИ СОЗДАНИИ 3 ШАРДА!
+  ch_s3r1:
+    image: clickhouse/clickhouse-server:24.3
+    container_name: idz4_ch_s3r1
+    hostname: idz4_ch_s3r1
+    volumes:
+      - ./config/clickhouse/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml
+      - ./config/clickhouse/s3r1_macros.xml:/etc/clickhouse-server/config.d/macros.xml
+      - ./config/clickhouse/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ch_s3r1_data:/var/lib/clickhouse
+    depends_on: [keeper1, keeper2, keeper3]
+    restart: unless-stopped
+
+  ch_s3r2:
+    image: clickhouse/clickhouse-server:24.3
+    container_name: idz4_ch_s3r2
+    hostname: idz4_ch_s3r2
+    volumes:
+      - ./config/clickhouse/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml
+      - ./config/clickhouse/s3r2_macros.xml:/etc/clickhouse-server/config.d/macros.xml
+      - ./config/clickhouse/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ch_s3r2_data:/var/lib/clickhouse
+    depends_on: [keeper1, keeper2, keeper3]
+    restart: unless-stopped
+
+volumes:
+  keeper1_data:
+  keeper2_data:
+  keeper3_data:
+  ch_s1r1_data:
+  ch_s1r2_data:
+  ch_s2r1_data:
+  ch_s2r2_data:
+  ch_s3r1_data:
+  ch_s3r2_data:
